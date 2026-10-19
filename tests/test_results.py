@@ -1,3 +1,6 @@
+import csv
+import io
+
 import pytest
 
 
@@ -85,3 +88,25 @@ def test_export_csv_unknown_competition_returns_404(client):
 
 def test_export_csv_invalid_competition_id_returns_422(client):
     assert client.get("/competitions/abc/results.csv").status_code == 422
+
+
+def test_export_csv_quotes_club_containing_comma(
+    client, make_competition, make_event, make_athlete, make_registration
+):
+    competition = make_competition(status="open")
+    event = make_event(competition["id"])
+    athlete = make_athlete("Dupont", club="AC Lille, Métropole")
+    registration = make_registration(event["id"], athlete["id"])
+    client.patch(f"/competitions/{competition['id']}", json={"status": "closed"})
+    client.put(f"/registrations/{registration['id']}/result", json={"performance": 12.34})
+
+    response = client.get(f"/competitions/{competition['id']}/results.csv")
+
+    assert response.status_code == 200
+    rows = list(csv.reader(io.StringIO(response.text)))
+    header, row = rows
+    assert len(row) == len(header)
+    record = dict(zip(header, row, strict=True))
+    assert record["club"] == "AC Lille, Métropole"
+    assert record["license_number"] == athlete["license_number"]
+    assert record["performance"] == "12.34"

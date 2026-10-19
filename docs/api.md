@@ -41,7 +41,7 @@ Les erreurs de validation (422) gardent le format FastAPI par défaut.
 | PATCH | `/registrations/{registration_id}` | Change le `status` d'une inscription | 200, 404, 409, 422 |
 | PUT | `/registrations/{registration_id}/result` | Enregistre ou remplace la `performance` d'une inscription | 200, 404, 409, 422 |
 | GET | `/events/{event_id}/ranking` | Classement de l'épreuve : liste d'entrées `rank`, `bib`, `athlete_id`, `last_name`, `first_name`, `club`, `performance` | 200, 404, 422 |
-| GET | `/competitions/{competition_id}/results.csv` | Export CSV des résultats de la compétition | 200, 404, 422 |
+| GET | `/competitions/{competition_id}/results.csv` | Export CSV des résultats de la compétition (champs entre guillemets si besoin, ex. club contenant une virgule) | 200, 404, 422 |
 
 ## Règles métier
 
