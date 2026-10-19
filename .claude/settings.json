@@ -1,5 +1,8 @@
 {
   "permissions": {
+    "allow": [
+      "mcp__plugin_dossard-equipe_dossard__list_views"
+    ],
     "deny": [
       "Read(./.env)",
       "Bash(cat *.env*)",
@@ -13,7 +16,19 @@
       "PowerShell(gc *.env*)",
       "PowerShell(cat *.env*)",
       "PowerShell(type *.env*)",
-      "PowerShell(Select-String * *.env*)"
+      "PowerShell(Select-String * *.env*)",
+      "Edit(scripts/legacy/**)"
+    ],
+    "ask": [
+      "mcp__plugin_dossard-equipe_dossard__query_view"
     ]
+  },
+  "extraKnownMarketplaces": {
+    "equipe-dossard": {
+      "source": { "source": "directory", "path": "." }
+    }
+  },
+  "enabledPlugins": {
+    "dossard-equipe@equipe-dossard": true
   }
 }

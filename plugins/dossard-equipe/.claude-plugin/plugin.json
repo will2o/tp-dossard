@@ -1,0 +1,5 @@
+{
+  "name": "dossard-equipe",
+  "description": "Socle d'équipe du projet dossard : conventions d'API, hooks de garde, de formatage et de journal MCP, et serveur MCP dossard en lecture seule.",
+  "version": "1.0.0"
+}
