@@ -39,6 +39,31 @@ def test_create_athlete_rejects_duplicate_license(client, make_athlete):
     assert response.json()["error"]["code"] == "conflict"
 
 
+def test_get_athlete_returns_detail_with_category(client, make_athlete):
+    athlete = make_athlete("Durand", club="AC Rivebelle")
+
+    response = client.get(f"/athletes/{athlete['id']}")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == athlete["id"]
+    assert body["last_name"] == "Durand"
+    assert body["category"] == "SENIOR"
+
+
+def test_get_athlete_unknown_returns_404(client):
+    response = client.get("/athletes/999")
+
+    assert response.status_code == 404
+    assert response.json()["error"]["code"] == "not_found"
+
+
+def test_get_athlete_rejects_non_integer_id(client):
+    response = client.get("/athletes/abc")
+
+    assert response.status_code == 422
+
+
 def test_list_athletes_filters_by_club(client, make_athlete):
     make_athlete("Durand", club="AC Rivebelle")
     make_athlete("Petit", club="Stade Nordval")
