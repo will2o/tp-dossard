@@ -4,7 +4,7 @@
       "type": "stdio",
       "command": "python",
       "args": [
-        "scripts/mcp_dossard.py"
+        "${CLAUDE_PROJECT_DIR}/scripts/mcp_dossard.py"
       ],
       "env": {}
     }
