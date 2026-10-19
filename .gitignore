@@ -10,6 +10,9 @@ build/
 data/*.db
 data/*.db-journal
 
+# Journal des appels MCP (écrit par .claude/hooks/journal_mcp.py)
+data/journal-mcp.log
+
 # Claude Code : fichiers personnels, jamais versionnés
 CLAUDE.local.md
 .claude/settings.local.json
