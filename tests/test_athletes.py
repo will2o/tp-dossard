@@ -77,6 +77,70 @@ def test_list_athletes_filters_by_club(client, make_athlete):
     assert [a["last_name"] for a in response.json()] == ["Durand"]
 
 
+def test_list_athletes_defaults_to_first_50(client, make_athlete):
+    for index in range(55):
+        make_athlete(f"Nom{index:02d}")
+
+    response = client.get("/athletes")
+
+    assert response.status_code == 200
+    last_names = [a["last_name"] for a in response.json()]
+    assert len(last_names) == 50
+    assert last_names[0] == "Nom00"
+    assert last_names[-1] == "Nom49"
+
+
+def test_list_athletes_applies_limit_and_offset(client, make_athlete):
+    for index in range(5):
+        make_athlete(f"Nom{index:02d}")
+
+    response = client.get("/athletes", params={"limit": 2, "offset": 1})
+
+    assert response.status_code == 200
+    assert [a["last_name"] for a in response.json()] == ["Nom01", "Nom02"]
+
+
+def test_list_athletes_offset_past_end_returns_empty_list(client, make_athlete):
+    make_athlete("Durand")
+
+    response = client.get("/athletes", params={"offset": 10})
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_list_athletes_accepts_limit_bounds(client, make_athlete):
+    make_athlete("Durand")
+
+    assert client.get("/athletes", params={"limit": 1}).status_code == 200
+    assert client.get("/athletes", params={"limit": 100}).status_code == 200
+
+
+def test_list_athletes_rejects_limit_out_of_bounds(client):
+    assert client.get("/athletes", params={"limit": 0}).status_code == 422
+    assert client.get("/athletes", params={"limit": 101}).status_code == 422
+
+
+def test_list_athletes_accepts_zero_offset(client):
+    assert client.get("/athletes", params={"offset": 0}).status_code == 200
+
+
+def test_list_athletes_rejects_negative_offset(client):
+    assert client.get("/athletes", params={"offset": -1}).status_code == 422
+
+
+def test_list_athletes_paginates_after_club_filter(client, make_athlete):
+    for index in range(4):
+        make_athlete(f"Rivebelle{index}", club="AC Rivebelle")
+    for index in range(4):
+        make_athlete(f"Nordval{index}", club="Stade Nordval")
+
+    response = client.get("/athletes", params={"club": "AC Rivebelle", "limit": 2, "offset": 2})
+
+    assert response.status_code == 200
+    assert [a["last_name"] for a in response.json()] == ["Rivebelle2", "Rivebelle3"]
+
+
 def _import_csv(client, content: bytes):
     return client.post("/athletes/import", content=content, headers={"Content-Type": "text/csv"})
 

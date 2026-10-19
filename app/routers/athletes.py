@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Body, status
+from fastapi import APIRouter, Body, Query, status
 
 from app.db import Conn
 from app.errors import UnprocessableError
@@ -13,8 +13,13 @@ router = APIRouter(prefix="/athletes", tags=["athletes"])
 
 
 @router.get("", response_model=list[AthleteOut])
-def list_athletes(conn: Conn, club: str | None = None) -> list[AthleteOut]:
-    return athletes.list_athletes(conn, club=club)
+def list_athletes(
+    conn: Conn,
+    club: str | None = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> list[AthleteOut]:
+    return athletes.list_athletes(conn, club=club, limit=limit, offset=offset)
 
 
 @router.get("/{athlete_id}", response_model=AthleteOut)
