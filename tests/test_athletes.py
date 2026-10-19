@@ -1,4 +1,7 @@
 from datetime import date
+from pathlib import Path
+
+EXAMPLE_CSV = Path(__file__).parents[1] / "scripts" / "legacy" / "licencies_exemple.csv"
 
 
 def test_create_athlete_returns_201_with_category(client):
@@ -72,3 +75,48 @@ def test_list_athletes_filters_by_club(client, make_athlete):
 
     assert response.status_code == 200
     assert [a["last_name"] for a in response.json()] == ["Durand"]
+
+
+def _import_csv(client, content: bytes):
+    return client.post("/athletes/import", content=content, headers={"Content-Type": "text/csv"})
+
+
+def test_import_athletes_creates_skips_and_reports_errors(client):
+    content = EXAMPLE_CSV.read_bytes()
+
+    response = _import_csv(client, content)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert (body["created"], body["skipped"]) == (17, 1)
+    assert [e["line"] for e in body["errors"]] == [15, 16]
+    assert len(client.get("/athletes").json()) == 17
+
+
+def test_import_athletes_twice_skips_everything_valid(client):
+    content = EXAMPLE_CSV.read_bytes()
+    _import_csv(client, content)
+
+    response = _import_csv(client, content)
+
+    body = response.json()
+    assert (body["created"], body["skipped"]) == (0, 18)
+    assert [e["line"] for e in body["errors"]] == [15, 16]
+
+
+def test_import_athletes_rejects_empty_body(client):
+    assert _import_csv(client, b"").status_code == 422
+
+
+def test_import_athletes_rejects_missing_columns(client):
+    response = _import_csv(client, b"nom;prenom\nValette;Margaux\n")
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "unprocessable"
+
+
+def test_import_athletes_rejects_non_utf8(client):
+    response = _import_csv(client, b"nom;prenom\n\xff\xfe\n")
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "unprocessable"

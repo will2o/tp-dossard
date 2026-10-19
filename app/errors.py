@@ -22,3 +22,8 @@ class NotFoundError(ApiError):
 class ConflictError(ApiError):
     status_code = 409
     code = "conflict"
+
+
+class UnprocessableError(ApiError):
+    status_code = 422
+    code = "unprocessable"

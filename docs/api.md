@@ -20,6 +20,7 @@ Toutes les erreurs métier renvoient :
 | `category_mismatch` | 409 | catégorie de l'athlète différente de celle de l'épreuve |
 | `medical_certificate_invalid` | 409 | certificat absent ou expiré à la date de la compétition |
 | `results_not_allowed` | 409 | résultat sur une inscription non confirmée ou une compétition non close |
+| `unprocessable` | 422 | CSV d'import illisible (encodage non UTF-8, colonnes manquantes) |
 
 Les erreurs de validation (422) gardent le format FastAPI par défaut.
 
@@ -35,6 +36,7 @@ Les erreurs de validation (422) gardent le format FastAPI par défaut.
 | GET | `/athletes` | Liste les athlètes triés par nom, filtre optionnel `?club=` (égalité exacte) | 200 |
 | GET | `/athletes/{athlete_id}` | Détail d'un athlète, avec sa `category` pour la saison en cours | 200, 404, 422 |
 | POST | `/athletes` | Crée un athlète ; la réponse ajoute sa `category` pour la saison en cours | 201, 409, 422 |
+| POST | `/athletes/import` | Importe un CSV brut (`Content-Type: text/csv`, séparateur `;`, dates `jj/mm/aaaa`) ; renvoie `created`, `skipped` (licence déjà enregistrée) et `errors` (`line`, `message`) | 200, 422 |
 | POST | `/events/{event_id}/registrations` | Inscrit un athlète (`athlete_id`) à une épreuve et lui attribue un dossard | 201, 404, 409, 422 |
 | PATCH | `/registrations/{registration_id}` | Change le `status` d'une inscription | 200, 404, 409, 422 |
 | PUT | `/registrations/{registration_id}/result` | Enregistre ou remplace la `performance` d'une inscription | 200, 404, 409, 422 |
